@@ -3,7 +3,7 @@
 A full-stack web application connecting job seekers with employers.
 
 **Built with:** FastAPI · PostgreSQL (Supabase) · HTML/CSS · JWT Auth  
-**Deployed on:** Railway (backend) · Netlify (frontend)
+**Deployed on:** Vercel (backend) · Netlify (frontend)
 
 ---
 
@@ -11,9 +11,9 @@ A full-stack web application connecting job seekers with employers.
 
 | | Link |
 |---|---|
-| Frontend | [f2024408250-jobportal.netlify.app](https://f2024408250-jobportal.netlify.app) |
-| Backend API | [jobportal-production.up.railway.app](https://jobportal-production.up.railway.app) |
-| API Docs | [jobportal-production.up.railway.app/docs](https://jobportal-production.up.railway.app/docs) |
+| Frontend | [joyful-marshmallow-cad593.netlify.app](https://joyful-marshmallow-cad593.netlify.app) |
+| Backend API | [job-portal-eta-sooty.vercel.app](https://job-portal-eta-sooty.vercel.app) |
+| API Docs | [job-portal-eta-sooty.vercel.app/docs](https://job-portal-eta-sooty.vercel.app/docs) |
 | GitHub | [github.com/f2024408250-bot/JobPortal](https://github.com/f2024408250-bot/JobPortal) |
 
 ---
@@ -35,10 +35,10 @@ JobPortal/
 │   ├── login.html           # Login / Register
 │   ├── jobs.html            # Browse & filter jobs
 │   ├── job-detail.html      # Single job + Apply
-│   ├── seeker-dashboard.html
-│   ├── employer-dashboard.html
-│   ├── about.html
-│   ├── css/style.css        # Shared stylesheet
+│   ├── dashboard.html       # Unified Dashboard (Seeker & Employer stats/views)
+│   ├── manage.html          # Manage Jobs / Applications
+│   ├── about.html           # About page
+│   ├── style.css            # Stylesheet
 │   └── js/api.js            # All fetch calls to backend
 ├── supabase_tables.sql  # Run this in Supabase SQL Editor
 └── README.md
@@ -84,17 +84,18 @@ Make sure the backend is running first. The `api.js` file points to `http://127.
 
 ### Step 4 — Deployment
 
-**Backend (Railway):**
-1. Push your code to GitHub
-2. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub repo
-3. Choose the `JobPortal` repository
-4. Add environment variables: `DATABASE_URL` and `SECRET_KEY`
-5. Railway will automatically build and deploy using the root `railway.json` file.
+**Backend (Vercel):**
+1. Push your code to GitHub.
+2. Go to [vercel.com](https://vercel.com) and import the `JobPortal` repository.
+3. In the project settings, add the Environment Variables:
+   - `DATABASE_URL` (your Supabase PostgreSQL connection string)
+   - `SECRET_KEY` (a secure random string for JWT signature verification)
+4. Vercel will automatically build and deploy your backend serverless functions using `vercel.json`.
 
 **Frontend (Netlify):**
-1. Open `frontend/js/api.js`
-2. Change `API_BASE` from `http://127.0.0.1:8000` to your Render URL
-3. Go to [netlify.com](https://netlify.com) → Drag and drop your `frontend` folder
+1. Open `frontend/js/api.js`.
+2. Ensure `API_BASE` points to your backend Vercel deployment (e.g., `https://job-portal-eta-sooty.vercel.app`).
+3. Deploy the `frontend` folder to [netlify.com](https://netlify.com) (either by dragging and dropping the `frontend` directory into your Netlify dashboard project or linking it via Git integration).
 
 ---
 

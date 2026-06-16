@@ -5,7 +5,7 @@
 // Detect if running locally or in production
 const API_BASE = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
   ? "http://127.0.0.1:8000"
-  : "https://jobportal-production.up.railway.app"; // Update this with your actual Railway URL if it differs
+  : "https://job-portal-eta-sooty.vercel.app";
 
 
 // ── token helpers ────────────────────────────────────────────
