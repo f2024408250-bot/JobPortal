@@ -321,6 +321,18 @@ def dashboard_stats(db: Session = Depends(get_db)):
     }
 
 
+@app.get("/debug-env")
+def debug_env():
+    db_url = os.getenv("DATABASE_URL")
+    secret_key = os.getenv("SECRET_KEY")
+    return {
+        "db_url_configured": db_url is not None,
+        "db_url_length": len(db_url) if db_url else 0,
+        "db_url_preview": db_url[:15] if db_url else "",
+        "secret_key_configured": secret_key is not None,
+    }
+
 @app.get("/")
 def root():
     return {"message": "Job Portal API is running", "docs": "/docs"}
+
