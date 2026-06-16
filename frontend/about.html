@@ -137,8 +137,7 @@
   function updateNav() {
     const el = document.getElementById("navAuth");
     if (isLoggedIn()) {
-      const page = getRole() === "employer" ? "employer-dashboard.html" : "seeker-dashboard.html";
-      el.innerHTML = `<a href="${page}">Dashboard</a><a href="#" class="btn-nav" onclick="logout()">Logout</a>`;
+      el.innerHTML = `<a href="dashboard.html">Dashboard</a><a href="#" class="btn-nav" onclick="logout()">Logout</a>`;
     } else {
       el.innerHTML = `<a href="login.html" class="btn-nav">Login / Register</a>`;
     }

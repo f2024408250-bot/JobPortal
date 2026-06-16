@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Data — Job Portal</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Job<span>Portal</span></div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="jobs.html">Browse Jobs</a>
+    <a href="about.html">About</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="#" class="btn-nav" onclick="logout()">Logout</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>Manage Portal</h1>
+    <p id="manageSubtext">Add, update, and manage your account data</p>
+  </div>
+</div>
+
+<main>
+  <div class="container">
+    <div class="dashboard-layout">
+
+      <!-- SIDEBAR -->
+      <div class="sidebar" id="manageSidebar">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div style="flex:1;">
+        
+        <!-- SECTION: POST/EDIT JOB (Employer Only) -->
+        <div id="sec-postjob" class="card" style="display:none;">
+          <h3 id="postJobTitle" style="color:var(--green-dark); margin-bottom:20px;">Post a New Job</h3>
+          <div id="postJobAlert" class="alert"></div>
+          <input type="hidden" id="editJobId"/>
+          
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Job Title</label>
+              <input type="text" id="jobTitle" placeholder="e.g. Python Developer"/>
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <select id="jobCategory">
+                <option value="">Select Category</option>
+                <option>IT</option>
+                <option>Marketing</option>
+                <option>Finance</option>
+                <option>Healthcare</option>
+                <option>Education</option>
+                <option>Engineering</option>
+                <option>Design</option>
+                <option>Sales</option>
+                <option>Customer Support</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Location</label>
+              <input type="text" id="jobLocation" placeholder="e.g. Lahore or Remote"/>
+            </div>
+            <div class="form-group">
+              <label>Job Type</label>
+              <select id="jobType">
+                <option>Full-time</option>
+                <option>Part-time</option>
+                <option>Remote</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Salary Range (optional)</label>
+              <input type="text" id="jobSalary" placeholder="e.g. $1000 - $1500/month"/>
+            </div>
+            <div class="form-group" id="isActiveGroup" style="display:none;">
+              <label>Status</label>
+              <select id="jobActive">
+                <option value="true">Active (Open)</option>
+                <option value="false">Inactive (Closed)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Job Description</label>
+            <textarea id="jobDescription" style="min-height:140px;" placeholder="Describe the job roles, responsibilities, and requirements..."></textarea>
+          </div>
+          <div style="display:flex; gap:12px;">
+            <button class="btn btn-primary" onclick="submitJob()">Publish Job</button>
+            <button class="btn btn-outline" onclick="resetJobForm()">Clear</button>
+          </div>
+        </div>
+
+        <!-- SECTION: COMPANY PROFILE (Employer Only) -->
+        <div id="sec-profile-employer" class="card" style="display:none;">
+          <h3 style="color:var(--green-dark); margin-bottom:20px;">Company Profile</h3>
+          <div id="employerProfileAlert" class="alert"></div>
+          <div class="form-group"><label>Full Name</label><input type="text" id="empName"/></div>
+          <div class="form-group"><label>Company Name</label><input type="text" id="empCompany"/></div>
+          <div class="form-group"><label>Company Bio</label><textarea id="empBio" placeholder="Tell job seekers about your company..."></textarea></div>
+          <button class="btn btn-primary" onclick="saveEmployerProfile()">Save Changes</button>
+        </div>
+
+        <!-- SECTION: APPLICATIONS FOR JOB (Employer Only) -->
+        <div id="sec-applications" class="card" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 style="color:var(--green-dark);">Applications for: <span id="appsJobTitle" style="color:var(--amber)"></span></h3>
+            <a href="dashboard.html" class="btn btn-outline btn-sm">Back</a>
+          </div>
+          <div id="applicationsList"><p style="color:var(--gray)">Loading applications...</p></div>
+        </div>
+
+        <!-- SECTION: SEEKER PROFILE (Job Seeker Only) -->
+        <div id="sec-profile-seeker" class="card" style="display:none;">
+          <h3 style="color:var(--green-dark); margin-bottom:20px;">Edit Seeker Profile</h3>
+          <div id="seekerProfileAlert" class="alert"></div>
+          <div class="form-group"><label>Full Name</label><input type="text" id="seekName"/></div>
+          <div class="form-group"><label>Bio</label><textarea id="seekBio" placeholder="Tell employers about yourself..."></textarea></div>
+          <div class="form-group"><label>Skills</label><input type="text" id="seekSkills" placeholder="e.g. Python, React, SQL"/></div>
+          <button class="btn btn-primary" onclick="saveSeekerProfile()">Save Changes</button>
+        </div>
+
+        <!-- SECTION: SEEKER BOOKMARKS (Job Seeker Only) -->
+        <div id="sec-bookmarks" class="card" style="display:none;">
+          <h3 style="color:var(--green-dark); margin-bottom:20px;">Saved Jobs</h3>
+          <div id="bookmarksList"><p style="color:var(--gray)">Loading saved jobs...</p></div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>© 2026 <span>Job Portal System</span> — UMT OSSD Y9</p>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+  if (!isLoggedIn()) {
+    window.location.href = "login.html";
+  }
+
+  const role = getRole();
+  const userId = parseInt(localStorage.getItem("user_id"));
+
+  // Parse query params
+  const urlParams = new URLSearchParams(window.location.search);
+  const activeTab = urlParams.get("tab") || "profile";
+  const jobIdParam = urlParams.get("jobId");
+  const editIdParam = urlParams.get("editId");
+
+  function initSidebar() {
+    const sidebar = document.getElementById("manageSidebar");
+    if (role === "employer") {
+      sidebar.innerHTML = `
+        <a class="sidebar-item" href="dashboard.html">My Job Postings</a>
+        <a class="sidebar-item" id="side-postjob" href="manage.html?tab=postjob">Post a New Job</a>
+        <a class="sidebar-item" id="side-profile" href="manage.html?tab=profile">Company Profile</a>
+      `;
+    } else {
+      sidebar.innerHTML = `
+        <a class="sidebar-item" href="dashboard.html">My Applications</a>
+        <a class="sidebar-item" id="side-bookmarks" href="manage.html?tab=bookmarks">Saved Jobs</a>
+        <a class="sidebar-item" id="side-profile" href="manage.html?tab=profile">Edit Profile</a>
+      `;
+    }
+  }
+
+  function showTab() {
+    initSidebar();
+    
+    // Hide all sections first
+    const sections = ["sec-postjob", "sec-profile-employer", "sec-applications", "sec-profile-seeker", "sec-bookmarks"];
+    sections.forEach(sec => document.getElementById(sec).style.display = "none");
+    
+    // De-activate sidebar links
+    const sidePost = document.getElementById("side-postjob");
+    const sideBookmarks = document.getElementById("side-bookmarks");
+    const sideProfile = document.getElementById("side-profile");
+    if (sidePost) sidePost.classList.remove("active");
+    if (sideBookmarks) sideBookmarks.classList.remove("active");
+    if (sideProfile) sideProfile.classList.remove("active");
+
+    if (role === "employer") {
+      if (activeTab === "postjob") {
+        document.getElementById("sec-postjob").style.display = "block";
+        if (sidePost) sidePost.classList.add("active");
+        if (editIdParam) {
+          prepareEditJob(editIdParam);
+        } else {
+          resetJobForm();
+        }
+      } else if (activeTab === "applications") {
+        document.getElementById("sec-applications").style.display = "block";
+        const jobTitle = urlParams.get("jobTitle") || "Job Details";
+        document.getElementById("appsJobTitle").textContent = decodeURIComponent(jobTitle);
+        loadApplicationsForJob(jobIdParam);
+      } else { // profile
+        document.getElementById("sec-profile-employer").style.display = "block";
+        if (sideProfile) sideProfile.classList.add("active");
+        loadEmployerProfile();
+      }
+    } else { // jobseeker
+      if (activeTab === "bookmarks") {
+        document.getElementById("sec-bookmarks").style.display = "block";
+        if (sideBookmarks) sideBookmarks.classList.add("active");
+        loadBookmarks();
+      } else { // profile
+        document.getElementById("sec-profile-seeker").style.display = "block";
+        if (sideProfile) sideProfile.classList.add("active");
+        loadSeekerProfile();
+      }
+    }
+  }
+
+  // ── EMPLOYER: LOAD COMPANY PROFILE ──
+  async function loadEmployerProfile() {
+    try {
+      const u = await User.me();
+      document.getElementById("empName").value = u.full_name || "";
+      document.getElementById("empCompany").value = u.company_name || "";
+      document.getElementById("empBio").value = u.bio || "";
+    } catch(e) {}
+  }
+
+  // ── EMPLOYER: SAVE COMPANY PROFILE ──
+  async function saveEmployerProfile() {
+    const alertEl = document.getElementById("employerProfileAlert");
+    try {
+      const name = document.getElementById("empName").value.trim();
+      const comp = document.getElementById("empCompany").value.trim();
+      const bio = document.getElementById("empBio").value.trim();
+      
+      await User.update({ full_name: name, company_name: comp, bio: bio });
+      alertEl.textContent = "Company profile updated successfully!";
+      alertEl.className = "alert alert-success show";
+      localStorage.setItem("full_name", name);
+    } catch(e) {
+      alertEl.textContent = e.message;
+      alertEl.className = "alert alert-error show";
+    }
+  }
+
+  // ── EMPLOYER: POST/EDIT JOB ──
+  async function prepareEditJob(jobId) {
+    document.getElementById("postJobTitle").textContent = "Edit Job Listing";
+    document.getElementById("isActiveGroup").style.display = "block";
+    try {
+      const job = await Jobs.getOne(jobId);
+      document.getElementById("editJobId").value = job.id;
+      document.getElementById("jobTitle").value = job.title;
+      document.getElementById("jobDescription").value = job.description;
+      document.getElementById("jobCategory").value = job.category;
+      document.getElementById("jobLocation").value = job.location;
+      document.getElementById("jobType").value = job.job_type;
+      document.getElementById("jobSalary").value = job.salary_range || "";
+      document.getElementById("jobActive").value = job.is_active.toString();
+    } catch(e) {
+      alert("Could not load job info.");
+    }
+  }
+
+  async function submitJob() {
+    const alertEl = document.getElementById("postJobAlert");
+    const editId = document.getElementById("editJobId").value;
+    const payload = {
+      title: document.getElementById("jobTitle").value.trim(),
+      description: document.getElementById("jobDescription").value.trim(),
+      category: document.getElementById("jobCategory").value,
+      location: document.getElementById("jobLocation").value.trim(),
+      job_type: document.getElementById("jobType").value,
+      salary_range: document.getElementById("jobSalary").value.trim() || null
+    };
+
+    if (editId) {
+      payload.is_active = document.getElementById("jobActive").value === "true";
+    }
+
+    if (!payload.title || !payload.description || !payload.category || !payload.location) {
+      alertEl.textContent = "Please fill in all required fields.";
+      alertEl.className = "alert alert-error show";
+      return;
+    }
+
+    try {
+      if (editId) {
+        await Jobs.update(editId, payload);
+        alertEl.textContent = "Job updated successfully!";
+      } else {
+        await Jobs.create(payload);
+        alertEl.textContent = "Job published successfully!";
+      }
+      alertEl.className = "alert alert-success show";
+      setTimeout(() => window.location.href = "dashboard.html", 1200);
+    } catch(e) {
+      alertEl.textContent = e.message;
+      alertEl.className = "alert alert-error show";
+    }
+  }
+
+  function resetJobForm() {
+    document.getElementById("editJobId").value = "";
+    document.getElementById("jobTitle").value = "";
+    document.getElementById("jobDescription").value = "";
+    document.getElementById("jobCategory").value = "";
+    document.getElementById("jobLocation").value = "";
+    document.getElementById("jobSalary").value = "";
+    document.getElementById("postJobTitle").textContent = "Post a New Job";
+    document.getElementById("isActiveGroup").style.display = "none";
+    document.getElementById("postJobAlert").className = "alert";
+  }
+
+  // ── EMPLOYER: LOAD JOB APPLICATIONS ──
+  async function loadApplicationsForJob(jobId) {
+    const el = document.getElementById("applicationsList");
+    try {
+      const apps = await Applications.forJob(jobId);
+      if (!apps.length) {
+        el.innerHTML = "<p style='color:var(--gray)'>No applications submitted for this job yet.</p>";
+        return;
+      }
+      el.innerHTML = `<div class="table-wrapper"><table>
+        <thead><tr><th>Applicant</th><th>Applied On</th><th>Status</th><th>Cover Letter</th><th>Update Status</th></tr></thead>
+        <tbody>${apps.map(a => `<tr>
+          <td style="font-weight:600;color:var(--green-dark);">${a.applicant_name}</td>
+          <td style="color:var(--gray)">${new Date(a.applied_at).toLocaleDateString()}</td>
+          <td><span class="badge ${badgeClass(a.status)}">${a.status}</span></td>
+          <td style="color:var(--gray);font-size:0.85rem;">${a.cover_letter ? a.cover_letter.substring(0, 60) + "..." : "—"}</td>
+          <td>
+            <select onchange="updateStatus(${a.id}, this.value)" style="padding:4px 8px;border:1px solid #C8D5CC;border-radius:6px;font-size:0.82rem;">
+              <option value="">Change</option>
+              <option>Pending</option>
+              <option>Reviewed</option>
+              <option>Shortlisted</option>
+              <option>Rejected</option>
+            </select>
+          </td>
+        </tr>`).join("")}</tbody></table></div>`;
+    } catch(e) {
+      el.innerHTML = "<p style='color:var(--gray)'>Could not load applications.</p>";
+    }
+  }
+
+  async function updateStatus(appId, newStatus) {
+    if (!newStatus) return;
+    try {
+      await Applications.updateStatus(appId, newStatus);
+      alert("Application status updated to: " + newStatus);
+      showTab(); // Reload list
+    } catch(e) {
+      alert(e.message);
+    }
+  }
+
+  // ── JOB SEEKER: LOAD SEEKER PROFILE ──
+  async function loadSeekerProfile() {
+    try {
+      const u = await User.me();
+      document.getElementById("seekName").value = u.full_name || "";
+      document.getElementById("seekBio").value = u.bio || "";
+      document.getElementById("seekSkills").value = u.skills || "";
+    } catch(e) {}
+  }
+
+  // ── JOB SEEKER: SAVE SEEKER PROFILE ──
+  async function saveSeekerProfile() {
+    const alertEl = document.getElementById("seekerProfileAlert");
+    try {
+      const name = document.getElementById("seekName").value.trim();
+      const bio = document.getElementById("seekBio").value.trim();
+      const skills = document.getElementById("seekSkills").value.trim();
+      
+      await User.update({ full_name: name, bio: bio, skills: skills });
+      alertEl.textContent = "Profile updated successfully!";
+      alertEl.className = "alert alert-success show";
+      localStorage.setItem("full_name", name);
+    } catch(e) {
+      alertEl.textContent = e.message;
+      alertEl.className = "alert alert-error show";
+    }
+  }
+
+  // ── JOB SEEKER: LOAD BOOKMARKS ──
+  async function loadBookmarks() {
+    const el = document.getElementById("bookmarksList");
+    try {
+      const bms = await Bookmarks.mine();
+      if (bms.length === 0) {
+        el.innerHTML = "<p style='color:var(--gray)'>No saved jobs yet.</p>";
+        return;
+      }
+      el.innerHTML = bms.map(b => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--green-light);">
+          <a href="job-detail.html?id=${b.job_id}" style="color:var(--green-dark); font-weight:600;">${b.job_title}</a>
+          <span style="color:var(--gray); font-size:0.82rem;">Saved ${new Date(b.saved_at).toLocaleDateString()}</span>
+        </div>`).join("");
+    } catch(e) {
+      el.innerHTML = "<p style='color:var(--gray)'>Could not load bookmarks.</p>";
+    }
+  }
+
+  function badgeClass(status) {
+    return { Pending: "badge-pending", Reviewed: "badge-reviewed", Shortlisted: "badge-shortlisted", Rejected: "badge-rejected" }[status] || "badge-pending";
+  }
+
+  // Run initialization
+  showTab();
+</script>
+</body>
+</html>

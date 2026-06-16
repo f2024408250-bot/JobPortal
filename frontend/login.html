@@ -77,7 +77,7 @@
 <script>
   // Redirect if already logged in
   if (isLoggedIn()) {
-    window.location.href = getRole() === "employer" ? "employer-dashboard.html" : "seeker-dashboard.html";
+    window.location.href = "dashboard.html";
   }
 
   function switchTab(tab) {
@@ -110,7 +110,7 @@
     try {
       const data = await Auth.login({ email, password });
       saveAuth(data);
-      window.location.href = data.role === "employer" ? "employer-dashboard.html" : "seeker-dashboard.html";
+      window.location.href = "dashboard.html";
     } catch(e) {
       showAlert(e.message);
     }
@@ -131,7 +131,7 @@
       saveAuth(data);
       showAlert("Account created! Redirecting...", "success");
       setTimeout(() => {
-        window.location.href = data.role === "employer" ? "employer-dashboard.html" : "seeker-dashboard.html";
+        window.location.href = "dashboard.html";
       }, 1000);
     } catch(e) {
       showAlert(e.message);

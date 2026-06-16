@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — Job Portal</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Job<span>Portal</span></div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="jobs.html">Browse Jobs</a>
+    <a href="about.html">About</a>
+    <a href="dashboard.html" class="active">Dashboard</a>
+    <a href="#" class="btn-nav" onclick="logout()">Logout</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>Welcome, <span id="userName" style="color:var(--amber)">User</span></h1>
+    <p id="userSubtext">Manage your applications, job listings, and profile</p>
+  </div>
+</div>
+
+<main>
+  <div class="container">
+    <div class="dashboard-layout">
+
+      <!-- SIDEBAR -->
+      <div class="sidebar" id="dashboardSidebar">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div class="main-content-area" style="flex:1;">
+        
+        <!-- JOB SEEKER VIEW -->
+        <div id="seekerDashboard" style="display:none;">
+          <!-- Applications Section -->
+          <div id="sec-applications" class="card" style="margin-bottom:20px;">
+            <h3 style="color:var(--green-dark); margin-bottom:20px;">My Applications</h3>
+            <div id="appsList"><p style="color:var(--gray)">Loading applications...</p></div>
+          </div>
+          
+          <!-- Bookmarks Section -->
+          <div id="sec-bookmarks" class="card">
+            <h3 style="color:var(--green-dark); margin-bottom:20px;">Saved Jobs</h3>
+            <div id="bookmarksList"><p style="color:var(--gray)">Loading bookmarks...</p></div>
+          </div>
+        </div>
+
+        <!-- EMPLOYER VIEW -->
+        <div id="employerDashboard" style="display:none;">
+          <!-- Job Listings Section -->
+          <div id="sec-myjobs" class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+              <h3 style="color:var(--green-dark);">My Job Postings</h3>
+              <a href="manage.html?tab=postjob" class="btn btn-amber btn-sm">+ Post New Job</a>
+            </div>
+            <div id="myJobsList"><p style="color:var(--gray)">Loading jobs...</p></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- DELETE JOB MODAL (For Employers) -->
+<div id="deleteModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+  <div class="card" style="max-width:400px; width:90%; padding:32px; text-align:center;">
+    <h3 style="color:var(--red); margin-bottom:12px;">Delete Job?</h3>
+    <p style="color:var(--gray); margin-bottom:24px;">This will permanently delete the job and all its applications.</p>
+    <div style="display:flex; gap:12px; justify-content:center;">
+      <button class="btn btn-danger" onclick="confirmDelete()">Yes, Delete</button>
+      <button class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 <span>Job Portal System</span> — UMT OSSD Y9</p>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+  if (!isLoggedIn()) {
+    window.location.href = "login.html";
+  }
+
+  const role = getRole();
+  const userName = getName();
+  const userId = parseInt(localStorage.getItem("user_id"));
+
+  document.getElementById("userName").textContent = userName;
+
+  let deleteJobId = null;
+
+  // Initialize page based on role
+  function initDashboard() {
+    const sidebar = document.getElementById("dashboardSidebar");
+    
+    if (role === "employer") {
+      document.getElementById("userSubtext").textContent = "Manage your job postings and review applications";
+      document.getElementById("employerDashboard").style.display = "block";
+      
+      sidebar.innerHTML = `
+        <a class="sidebar-item active" href="dashboard.html">My Job Postings</a>
+        <a class="sidebar-item" href="manage.html?tab=postjob">Post a New Job</a>
+        <a class="sidebar-item" href="manage.html?tab=profile">Company Profile</a>
+      `;
+      loadMyJobs();
+    } else {
+      document.getElementById("userSubtext").textContent = "Manage your applications, saved jobs, and profile";
+      document.getElementById("seekerDashboard").style.display = "block";
+      
+      sidebar.innerHTML = `
+        <a class="sidebar-item active" href="dashboard.html">My Applications</a>
+        <a class="sidebar-item" href="manage.html?tab=bookmarks">Saved Jobs</a>
+        <a class="sidebar-item" href="manage.html?tab=profile">Edit Profile</a>
+      `;
+      loadApplications();
+      loadBookmarks();
+    }
+  }
+
+  // ── JOB SEEKER: LOAD APPLICATIONS ──
+  async function loadApplications() {
+    const el = document.getElementById("appsList");
+    try {
+      const apps = await Applications.mine();
+      if (apps.length === 0) {
+        el.innerHTML = "<p style='color:var(--gray)'>You haven't applied to any jobs yet. <a href='jobs.html' style='color:var(--green-mid)'>Browse Jobs</a></p>";
+        return;
+      }
+      el.innerHTML = `<div class="table-wrapper"><table>
+        <thead><tr><th>Job Title</th><th>Applied On</th><th>Status</th></tr></thead>
+        <tbody>${apps.map(a => `
+          <tr>
+            <td><a href="job-detail.html?id=${a.job_id}" style="color:var(--green-mid); font-weight:600;">${a.job_title}</a></td>
+            <td style="color:var(--gray)">${new Date(a.applied_at).toLocaleDateString()}</td>
+            <td><span class="badge ${badgeClass(a.status)}">${a.status}</span></td>
+          </tr>`).join("")}
+        </tbody></table></div>`;
+    } catch(e) {
+      el.innerHTML = "<p style='color:var(--gray)'>Could not load applications.</p>";
+    }
+  }
+
+  // ── JOB SEEKER: LOAD BOOKMARKS ──
+  async function loadBookmarks() {
+    const el = document.getElementById("bookmarksList");
+    try {
+      const bms = await Bookmarks.mine();
+      if (bms.length === 0) {
+        el.innerHTML = "<p style='color:var(--gray)'>No saved jobs yet.</p>";
+        return;
+      }
+      el.innerHTML = bms.map(b => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--green-light);">
+          <a href="job-detail.html?id=${b.job_id}" style="color:var(--green-dark); font-weight:600;">${b.job_title}</a>
+          <span style="color:var(--gray); font-size:0.82rem;">Saved ${new Date(b.saved_at).toLocaleDateString()}</span>
+        </div>`).join("");
+    } catch(e) {
+      el.innerHTML = "<p style='color:var(--gray)'>Could not load bookmarks.</p>";
+    }
+  }
+
+  // ── EMPLOYER: LOAD JOBS ──
+  async function loadMyJobs() {
+    const el = document.getElementById("myJobsList");
+    try {
+      const all = await Jobs.getAll();
+      const mine = all.filter(j => j.employer_id === userId);
+      if (!mine.length) {
+        el.innerHTML = "<p style='color:var(--gray)'>No jobs posted yet. <a href='manage.html?tab=postjob' style='color:var(--green-mid)'>Post a Job</a></p>";
+        return;
+      }
+      el.innerHTML = mine.map(job => `
+        <div style="border:1px solid var(--green-light);border-radius:var(--radius);padding:18px;margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
+            <div>
+              <h4 style="color:var(--green-dark);margin-bottom:4px;">${job.title}</h4>
+              <div class="job-meta">
+                <span class="tag">${job.category}</span>
+                <span class="tag">${job.location}</span>
+                <span class="tag tag-amber">${job.job_type}</span>
+                <span class="badge ${job.is_active ? "badge-shortlisted" : "badge-rejected"}">${job.is_active ? "Active" : "Closed"}</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <a href="manage.html?tab=applications&jobId=${job.id}&jobTitle=${encodeURIComponent(job.title)}" class="btn btn-primary btn-sm">Applications</a>
+              <a href="manage.html?tab=postjob&editId=${job.id}" class="btn btn-outline btn-sm">Edit</a>
+              <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${job.id})">Delete</button>
+            </div>
+          </div>
+        </div>`).join("");
+    } catch(e) {
+      el.innerHTML = "<p style='color:var(--gray)'>Could not load jobs.</p>";
+    }
+  }
+
+  // Helper Badge classes
+  function badgeClass(status) {
+    return { Pending: "badge-pending", Reviewed: "badge-reviewed", Shortlisted: "badge-shortlisted", Rejected: "badge-rejected" }[status] || "badge-pending";
+  }
+
+  // Delete Job operations
+  function openDeleteModal(id) {
+    deleteJobId = id;
+    document.getElementById("deleteModal").style.display = "flex";
+  }
+
+  function closeDeleteModal() {
+    document.getElementById("deleteModal").style.display = "none";
+  }
+
+  async function confirmDelete() {
+    try {
+      await Jobs.delete(deleteJobId);
+      closeDeleteModal();
+      loadMyJobs();
+    } catch(e) {
+      alert(e.message);
+    }
+  }
+
+  // Run initialization
+  initDashboard();
+</script>
+</body>
+</html>
