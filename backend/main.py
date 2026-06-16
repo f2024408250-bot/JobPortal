@@ -5,6 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Optional, List
 
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from database import get_db
 import models, schemas
 from auth import hash_password, verify_password, create_access_token, get_current_user
