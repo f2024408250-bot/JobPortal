@@ -323,14 +323,39 @@ def dashboard_stats(db: Session = Depends(get_db)):
 
 @app.get("/debug-env")
 def debug_env():
+    import traceback
     db_url = os.getenv("DATABASE_URL")
     secret_key = os.getenv("SECRET_KEY")
+    
+    psycopg2_importable = False
+    psycopg2_error = ""
+    try:
+        import psycopg2
+        psycopg2_importable = True
+    except Exception as e:
+        psycopg2_error = str(e)
+        
+    db_query_success = False
+    db_query_error = ""
+    try:
+        db = get_db()
+        session = next(db)
+        count = session.query(models.User).count()
+        db_query_success = True
+    except Exception as e:
+        db_query_error = str(e) + "\n" + traceback.format_exc()
+
     return {
         "db_url_configured": db_url is not None,
         "db_url_length": len(db_url) if db_url else 0,
         "db_url_preview": db_url[:15] if db_url else "",
         "secret_key_configured": secret_key is not None,
+        "psycopg2_importable": psycopg2_importable,
+        "psycopg2_error": psycopg2_error,
+        "db_query_success": db_query_success,
+        "db_query_error": db_query_error,
     }
+
 
 @app.get("/")
 def root():
