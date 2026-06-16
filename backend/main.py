@@ -345,6 +345,14 @@ def debug_env():
     except Exception as e:
         db_query_error = str(e) + "\n" + traceback.format_exc()
 
+    hash_success = False
+    hash_error = ""
+    try:
+        hashed = hash_password("testpassword123")
+        hash_success = True
+    except Exception as e:
+        hash_error = str(e) + "\n" + traceback.format_exc()
+
     return {
         "db_url_configured": db_url is not None,
         "db_url_length": len(db_url) if db_url else 0,
@@ -354,7 +362,10 @@ def debug_env():
         "psycopg2_error": psycopg2_error,
         "db_query_success": db_query_success,
         "db_query_error": db_query_error,
+        "hash_success": hash_success,
+        "hash_error": hash_error,
     }
+
 
 
 @app.get("/")
