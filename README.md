@@ -3,7 +3,7 @@
 A full-stack web application connecting job seekers with employers.
 
 **Built with:** FastAPI · PostgreSQL (Supabase) · HTML/CSS · JWT Auth  
-**Deployed on:** Render (backend) · Netlify (frontend)
+**Deployed on:** Railway (backend) · Netlify (frontend)
 
 ---
 
@@ -11,10 +11,10 @@ A full-stack web application connecting job seekers with employers.
 
 | | Link |
 |---|---|
-| Frontend | _Add your Netlify link here_ |
-| Backend API | _Add your Render link here_ |
-| API Docs | _Your Render link_ + `/docs` |
-| GitHub | _This repo_ |
+| Frontend | [f2024408250-jobportal.netlify.app](https://f2024408250-jobportal.netlify.app) |
+| Backend API | [jobportal-production.up.railway.app](https://jobportal-production.up.railway.app) |
+| API Docs | [jobportal-production.up.railway.app/docs](https://jobportal-production.up.railway.app/docs) |
+| GitHub | [github.com/f2024408250-bot/JobPortal](https://github.com/f2024408250-bot/JobPortal) |
 
 ---
 
@@ -84,13 +84,12 @@ Make sure the backend is running first. The `api.js` file points to `http://127.
 
 ### Step 4 — Deployment
 
-**Backend (Render):**
+**Backend (Railway):**
 1. Push your code to GitHub
-2. Go to [render.com](https://render.com) → New Web Service → Connect your repo
-3. Set root directory to `backend`
-4. Build command: `pip install -r requirements.txt`
-5. Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-6. Add environment variables: `DATABASE_URL` and `SECRET_KEY`
+2. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub repo
+3. Choose the `JobPortal` repository
+4. Add environment variables: `DATABASE_URL` and `SECRET_KEY`
+5. Railway will automatically build and deploy using the root `railway.json` file.
 
 **Frontend (Netlify):**
 1. Open `frontend/js/api.js`
