@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Job Portal — Find Your Next Opportunity</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-logo">Job<span>Portal</span></div>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html" class="active">Home</a>
+    <a href="jobs.html">Browse Jobs</a>
+    <a href="about.html">About</a>
+    <span id="navAuth"></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <h1>Find the Job You <span>Deserve</span></h1>
+    <p>Thousands of opportunities from top employers — search, apply, and track everything in one place.</p>
+    <div class="search-bar">
+      <input type="text" id="heroSearch" placeholder="Search by title, skill, or category..." />
+      <button onclick="doHeroSearch()">Search</button>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="container">
+    <div class="stat-item">
+      <div class="number" id="statJobs">—</div>
+      <div class="label">Active Jobs</div>
+    </div>
+    <div class="stat-item">
+      <div class="number" id="statUsers">—</div>
+      <div class="label">Registered Users</div>
+    </div>
+    <div class="stat-item">
+      <div class="number" id="statApps">—</div>
+      <div class="label">Applications Submitted</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURED JOBS -->
+<main>
+  <div class="container">
+    <section class="section">
+      <div class="section-title">Latest Job Listings</div>
+      <div class="section-sub">Fresh opportunities added recently</div>
+      <div class="jobs-grid" id="featuredJobs">
+        <p style="color:var(--gray)">Loading jobs...</p>
+      </div>
+      <div style="text-align:center; margin-top:32px;">
+        <a href="jobs.html" class="btn btn-primary">View All Jobs</a>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section" style="padding-top:0">
+      <div class="section-title">How It Works</div>
+      <div class="section-sub">Three simple steps to get hired</div>
+      <div class="grid-3">
+        <div class="card" style="text-align:center">
+          <div style="font-size:2.4rem; margin-bottom:14px;">📝</div>
+          <h3 style="color:var(--green-dark); margin-bottom:8px;">Create Your Profile</h3>
+          <p style="color:var(--gray); font-size:0.9rem;">Register as a Job Seeker, add your skills and experience, and you are ready to apply.</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:2.4rem; margin-bottom:14px;">🔍</div>
+          <h3 style="color:var(--green-dark); margin-bottom:8px;">Search and Filter</h3>
+          <p style="color:var(--gray); font-size:0.9rem;">Browse all listings or filter by category, location, and job type to find the right match.</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:2.4rem; margin-bottom:14px;">🚀</div>
+          <h3 style="color:var(--green-dark); margin-bottom:8px;">Apply and Track</h3>
+          <p style="color:var(--gray); font-size:0.9rem;">Apply with one click, add a cover letter, and track your application status in real time.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 <span>Job Portal System</span> — Built with FastAPI and PostgreSQL</p>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+  // Update nav based on login state
+  function updateNav() {
+    const el = document.getElementById("navAuth");
+    if (isLoggedIn()) {
+      const role = getRole();
+      const page = role === "employer" ? "employer-dashboard.html" : "seeker-dashboard.html";
+      el.innerHTML = `<a href="${page}">Dashboard</a><a href="#" class="btn-nav" onclick="logout()">Logout</a>`;
+    } else {
+      el.innerHTML = `<a href="login.html" class="btn-nav">Login / Register</a>`;
+    }
+  }
+
+  // Load dashboard stats
+  async function loadStats() {
+    try {
+      const data = await Dashboard.stats();
+      document.getElementById("statJobs").textContent  = data.active_jobs;
+      document.getElementById("statUsers").textContent = data.total_users;
+      document.getElementById("statApps").textContent  = data.total_applications;
+    } catch(e) {}
+  }
+
+  // Load featured jobs (latest 6)
+  async function loadFeatured() {
+    const container = document.getElementById("featuredJobs");
+    try {
+      const jobs = await Jobs.getAll();
+      const latest = jobs.slice(0, 6);
+      if (latest.length === 0) {
+        container.innerHTML = "<p style='color:var(--gray)'>No jobs posted yet.</p>";
+        return;
+      }
+      container.innerHTML = latest.map(job => `
+        <div class="job-card" onclick="window.location='job-detail.html?id=${job.id}'">
+          <h3>${job.title}</h3>
+          <div class="company">${job.company_name || job.employer_name}</div>
+          <p style="color:var(--gray); font-size:0.88rem; margin-bottom:8px;">${job.description.substring(0,100)}...</p>
+          <div class="job-meta">
+            <span class="tag">${job.category}</span>
+            <span class="tag">${job.location}</span>
+            <span class="tag tag-amber">${job.job_type}</span>
+            ${job.salary_range ? `<span class="tag">💰 ${job.salary_range}</span>` : ""}
+          </div>
+        </div>
+      `).join("");
+    } catch(e) {
+      container.innerHTML = "<p style='color:var(--gray)'>Could not load jobs. Make sure the backend is running.</p>";
+    }
+  }
+
+  function doHeroSearch() {
+    const keyword = document.getElementById("heroSearch").value.trim();
+    if (keyword) window.location.href = `jobs.html?search=${encodeURIComponent(keyword)}`;
+    else window.location.href = "jobs.html";
+  }
+
+  document.getElementById("heroSearch").addEventListener("keydown", e => { if (e.key === "Enter") doHeroSearch(); });
+
+  updateNav();
+  loadStats();
+  loadFeatured();
+</script>
+</body>
+</html>

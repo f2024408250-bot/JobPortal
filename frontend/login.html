@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login / Register — Job Portal</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Job<span>Portal</span></div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="jobs.html">Browse Jobs</a>
+    <a href="about.html">About</a>
+  </div>
+</nav>
+
+<div class="auth-wrapper">
+  <div class="auth-box">
+    <h2>Welcome Back</h2>
+    <p>Login to your account or create a new one</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Login</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <div id="alertBox" class="alert"></div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="loginEmail" placeholder="you@email.com"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="Your password"/>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doLogin()">Login</button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="registerForm" style="display:none">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="regName" placeholder="Hamza Hassan"/>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="regEmail" placeholder="you@email.com"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="regPassword" placeholder="Create a strong password"/>
+      </div>
+      <div class="form-group">
+        <label>I am a</label>
+        <select id="regRole" onchange="toggleCompany()">
+          <option value="jobseeker">Job Seeker</option>
+          <option value="employer">Employer</option>
+        </select>
+      </div>
+      <div class="form-group" id="companyGroup" style="display:none">
+        <label>Company Name</label>
+        <input type="text" id="regCompany" placeholder="Your company name"/>
+      </div>
+      <button class="btn btn-amber btn-full" onclick="doRegister()">Create Account</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  // Redirect if already logged in
+  if (isLoggedIn()) {
+    window.location.href = getRole() === "employer" ? "employer-dashboard.html" : "seeker-dashboard.html";
+  }
+
+  function switchTab(tab) {
+    document.getElementById("loginForm").style.display    = tab === "login"    ? "block" : "none";
+    document.getElementById("registerForm").style.display = tab === "register" ? "block" : "none";
+    document.getElementById("tabLogin").classList.toggle("active",    tab === "login");
+    document.getElementById("tabRegister").classList.toggle("active", tab === "register");
+    hideAlert();
+  }
+
+  function toggleCompany() {
+    const role = document.getElementById("regRole").value;
+    document.getElementById("companyGroup").style.display = role === "employer" ? "block" : "none";
+  }
+
+  function showAlert(msg, type = "error") {
+    const el = document.getElementById("alertBox");
+    el.textContent = msg;
+    el.className = `alert alert-${type} show`;
+  }
+
+  function hideAlert() {
+    document.getElementById("alertBox").className = "alert";
+  }
+
+  async function doLogin() {
+    const email    = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    if (!email || !password) return showAlert("Please fill in all fields.");
+    try {
+      const data = await Auth.login({ email, password });
+      saveAuth(data);
+      window.location.href = data.role === "employer" ? "employer-dashboard.html" : "seeker-dashboard.html";
+    } catch(e) {
+      showAlert(e.message);
+    }
+  }
+
+  async function doRegister() {
+    const full_name    = document.getElementById("regName").value.trim();
+    const email        = document.getElementById("regEmail").value.trim();
+    const password     = document.getElementById("regPassword").value;
+    const role         = document.getElementById("regRole").value;
+    const company_name = document.getElementById("regCompany").value.trim();
+
+    if (!full_name || !email || !password) return showAlert("Please fill in all required fields.");
+    if (role === "employer" && !company_name) return showAlert("Please enter your company name.");
+
+    try {
+      const data = await Auth.register({ full_name, email, password, role, company_name: company_name || null });
+      saveAuth(data);
+      showAlert("Account created! Redirecting...", "success");
+      setTimeout(() => {
+        window.location.href = data.role === "employer" ? "employer-dashboard.html" : "seeker-dashboard.html";
+      }, 1000);
+    } catch(e) {
+      showAlert(e.message);
+    }
+  }
+
+  // Allow Enter key on login
+  document.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      if (document.getElementById("loginForm").style.display !== "none") doLogin();
+      else doRegister();
+    }
+  });
+</script>
+</body>
+</html>

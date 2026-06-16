@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About — Job Portal</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Job<span>Portal</span></div>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html">Home</a>
+    <a href="jobs.html">Browse Jobs</a>
+    <a href="about.html" class="active">About</a>
+    <span id="navAuth"></span>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>About Job Portal</h1>
+    <p>A full-stack project built with FastAPI, PostgreSQL, and HTML/CSS</p>
+  </div>
+</div>
+
+<main>
+  <div class="container">
+
+    <section class="section">
+      <div class="grid-2" style="gap:40px; align-items:start;">
+        <div>
+          <div class="section-title">What is Job Portal?</div>
+          <p style="color:var(--gray); line-height:1.8; margin-bottom:16px;">
+            Job Portal is a full-stack web application that connects job seekers with employers on a single platform.
+            Job seekers can create profiles, search for opportunities, apply with cover letters, and track their application status in real time.
+            Employers can post job listings, manage them, and review every application they receive.
+          </p>
+          <p style="color:var(--gray); line-height:1.8;">
+            This project was built as a final semester submission for the Open Source Software Development course at the University of Management and Technology (UMT), Lahore.
+          </p>
+        </div>
+        <div>
+          <div class="card">
+            <h4 style="color:var(--green-dark); margin-bottom:16px;">Technology Stack</h4>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--green-light);">
+                <span style="font-weight:600; color:var(--charcoal);">Frontend</span>
+                <span style="color:var(--gray); font-size:0.88rem;">HTML5, CSS3, JavaScript</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--green-light);">
+                <span style="font-weight:600; color:var(--charcoal);">Backend</span>
+                <span style="color:var(--gray); font-size:0.88rem;">Python, FastAPI, SQLAlchemy</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--green-light);">
+                <span style="font-weight:600; color:var(--charcoal);">Database</span>
+                <span style="color:var(--gray); font-size:0.88rem;">PostgreSQL on Supabase</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--green-light);">
+                <span style="font-weight:600; color:var(--charcoal);">Auth</span>
+                <span style="color:var(--gray); font-size:0.88rem;">JWT Tokens, Bcrypt</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--green-light);">
+                <span style="font-weight:600; color:var(--charcoal);">Backend Deploy</span>
+                <span style="color:var(--gray); font-size:0.88rem;">Render</span>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span style="font-weight:600; color:var(--charcoal);">Frontend Deploy</span>
+                <span style="color:var(--gray); font-size:0.88rem;">Netlify</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0;">
+      <div class="section-title">Key Features</div>
+      <div class="grid-3">
+        <div class="card">
+          <div style="font-size:2rem; margin-bottom:12px;">🔐</div>
+          <h4 style="color:var(--green-dark); margin-bottom:8px;">Secure Authentication</h4>
+          <p style="color:var(--gray); font-size:0.88rem; line-height:1.7;">JWT-based login and registration for both Job Seekers and Employers. Passwords are always hashed with bcrypt.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:2rem; margin-bottom:12px;">🔍</div>
+          <h4 style="color:var(--green-dark); margin-bottom:8px;">Smart Job Search</h4>
+          <p style="color:var(--gray); font-size:0.88rem; line-height:1.7;">Search by keyword, filter by category, location, and job type. Results load in real time from the database.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:2rem; margin-bottom:12px;">📋</div>
+          <h4 style="color:var(--green-dark); margin-bottom:8px;">Application Tracking</h4>
+          <p style="color:var(--gray); font-size:0.88rem; line-height:1.7;">Applicants can see their status: Pending, Reviewed, Shortlisted, or Rejected — updated by the employer.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:2rem; margin-bottom:12px;">🏢</div>
+          <h4 style="color:var(--green-dark); margin-bottom:8px;">Employer Tools</h4>
+          <p style="color:var(--gray); font-size:0.88rem; line-height:1.7;">Employers can post, edit, and delete jobs. They can view every applicant and manage their status from one dashboard.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:2rem; margin-bottom:12px;">🔖</div>
+          <h4 style="color:var(--green-dark); margin-bottom:8px;">Job Bookmarking</h4>
+          <p style="color:var(--gray); font-size:0.88rem; line-height:1.7;">Job seekers can save interesting listings to a personal bookmark list and come back to apply later.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:2rem; margin-bottom:12px;">📱</div>
+          <h4 style="color:var(--green-dark); margin-bottom:8px;">Responsive Design</h4>
+          <p style="color:var(--gray); font-size:0.88rem; line-height:1.7;">The entire frontend adapts to mobile and desktop screens using CSS media queries. No framework required.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0;">
+      <div class="card" style="text-align:center; padding:40px;">
+        <div class="section-title" style="margin-bottom:8px;">Built By</div>
+        <p style="color:var(--amber); font-size:1.1rem; font-weight:700; margin-bottom:6px;">Hamza Hassan</p>
+        <p style="color:var(--gray); font-size:0.9rem; margin-bottom:4px;">Student ID: F2024408250</p>
+        <p style="color:var(--gray); font-size:0.9rem; margin-bottom:4px;">Cybersecurity — 4th Semester</p>
+        <p style="color:var(--gray); font-size:0.9rem;">University of Management and Technology, Lahore</p>
+        <div style="margin-top:24px;">
+          <a href="jobs.html" class="btn btn-primary" style="margin-right:12px;">Browse Jobs</a>
+          <a href="login.html" class="btn btn-outline">Get Started</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <p>© 2026 <span>Job Portal System</span> — UMT OSSD Y9</p>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+  function updateNav() {
+    const el = document.getElementById("navAuth");
+    if (isLoggedIn()) {
+      const page = getRole() === "employer" ? "employer-dashboard.html" : "seeker-dashboard.html";
+      el.innerHTML = `<a href="${page}">Dashboard</a><a href="#" class="btn-nav" onclick="logout()">Logout</a>`;
+    } else {
+      el.innerHTML = `<a href="login.html" class="btn-nav">Login / Register</a>`;
+    }
+  }
+  updateNav();
+</script>
+</body>
+</html>

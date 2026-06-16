@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Browse Jobs — Job Portal</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Job<span>Portal</span></div>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html">Home</a>
+    <a href="jobs.html" class="active">Browse Jobs</a>
+    <a href="about.html">About</a>
+    <span id="navAuth"></span>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>Browse All Jobs</h1>
+    <p>Filter by category, location, or job type to find your perfect role</p>
+  </div>
+</div>
+
+<main>
+  <div class="container">
+
+    <!-- FILTERS -->
+    <div class="filters">
+      <div class="form-group">
+        <label>Search Keyword</label>
+        <input type="text" id="filterKeyword" placeholder="Title, skill, category..."/>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="filterCategory">
+          <option value="">All Categories</option>
+          <option>IT</option>
+          <option>Marketing</option>
+          <option>Finance</option>
+          <option>Healthcare</option>
+          <option>Education</option>
+          <option>Engineering</option>
+          <option>Design</option>
+          <option>Sales</option>
+          <option>Customer Support</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" id="filterLocation" placeholder="City or Remote"/>
+      </div>
+      <div class="form-group">
+        <label>Job Type</label>
+        <select id="filterType">
+          <option value="">All Types</option>
+          <option>Full-time</option>
+          <option>Part-time</option>
+          <option>Remote</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="applyFilters()">Search</button>
+      <button class="btn btn-outline" onclick="clearFilters()">Clear</button>
+    </div>
+
+    <!-- RESULTS COUNT -->
+    <p id="resultsCount" style="color:var(--gray); font-size:0.88rem; margin-bottom:20px;"></p>
+
+    <!-- JOB GRID -->
+    <div class="jobs-grid" id="jobsGrid">
+      <p style="color:var(--gray)">Loading jobs...</p>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <p>© 2026 <span>Job Portal System</span></p>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+  function updateNav() {
+    const el = document.getElementById("navAuth");
+    if (isLoggedIn()) {
+      const page = getRole() === "employer" ? "employer-dashboard.html" : "seeker-dashboard.html";
+      el.innerHTML = `<a href="${page}">Dashboard</a><a href="#" class="btn-nav" onclick="logout()">Logout</a>`;
+    } else {
+      el.innerHTML = `<a href="login.html" class="btn-nav">Login / Register</a>`;
+    }
+  }
+
+  async function loadJobs(filters = {}, keyword = "") {
+    const grid = document.getElementById("jobsGrid");
+    const count = document.getElementById("resultsCount");
+    grid.innerHTML = "<p style='color:var(--gray)'>Loading...</p>";
+    try {
+      let jobs;
+      if (keyword) {
+        jobs = await Jobs.search(keyword);
+      } else {
+        jobs = await Jobs.getAll(filters);
+      }
+      count.textContent = `${jobs.length} job${jobs.length !== 1 ? "s" : ""} found`;
+      if (jobs.length === 0) {
+        grid.innerHTML = "<p style='color:var(--gray)'>No jobs match your search. Try different filters.</p>";
+        return;
+      }
+      grid.innerHTML = jobs.map(job => `
+        <div class="job-card" onclick="window.location='job-detail.html?id=${job.id}'">
+          <h3>${job.title}</h3>
+          <div class="company">${job.company_name || job.employer_name}</div>
+          <p style="color:var(--gray); font-size:0.88rem; margin-bottom:8px;">${job.description.substring(0,110)}...</p>
+          <div class="job-meta">
+            <span class="tag">${job.category}</span>
+            <span class="tag">${job.location}</span>
+            <span class="tag tag-amber">${job.job_type}</span>
+            ${job.salary_range ? `<span class="tag">💰 ${job.salary_range}</span>` : ""}
+          </div>
+          <div style="margin-top:14px;">
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); window.location='job-detail.html?id=${job.id}'">View Details</button>
+          </div>
+        </div>
+      `).join("");
+    } catch(e) {
+      grid.innerHTML = "<p style='color:var(--gray)'>Error loading jobs. Please try again.</p>";
+    }
+  }
+
+  function applyFilters() {
+    const keyword  = document.getElementById("filterKeyword").value.trim();
+    const category = document.getElementById("filterCategory").value;
+    const location = document.getElementById("filterLocation").value.trim();
+    const job_type = document.getElementById("filterType").value;
+
+    if (keyword) {
+      loadJobs({}, keyword);
+    } else {
+      const filters = {};
+      if (category) filters.category = category;
+      if (location) filters.location = location;
+      if (job_type) filters.job_type = job_type;
+      loadJobs(filters);
+    }
+  }
+
+  function clearFilters() {
+    document.getElementById("filterKeyword").value = "";
+    document.getElementById("filterCategory").value = "";
+    document.getElementById("filterLocation").value = "";
+    document.getElementById("filterType").value = "";
+    loadJobs();
+  }
+
+  // Check URL for search param from home page
+  const urlParams = new URLSearchParams(window.location.search);
+  const searchParam = urlParams.get("search");
+  if (searchParam) {
+    document.getElementById("filterKeyword").value = searchParam;
+    loadJobs({}, searchParam);
+  } else {
+    loadJobs();
+  }
+
+  updateNav();
+</script>
+</body>
+</html>

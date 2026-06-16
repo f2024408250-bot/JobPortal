@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Job Detail — Job Portal</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Job<span>Portal</span></div>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html">Home</a>
+    <a href="jobs.html">Browse Jobs</a>
+    <a href="about.html">About</a>
+    <span id="navAuth"></span>
+  </div>
+</nav>
+
+<main style="padding: 40px 0;">
+  <div class="container">
+    <a href="jobs.html" style="color:var(--green-mid); font-size:0.9rem; display:inline-block; margin-bottom:24px;">← Back to Jobs</a>
+
+    <div id="jobContent">
+      <p style="color:var(--gray)">Loading job details...</p>
+    </div>
+
+    <!-- APPLY MODAL -->
+    <div id="applyModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+      <div class="card" style="max-width:480px; width:90%; padding:32px;">
+        <h3 style="color:var(--green-dark); margin-bottom:6px;">Apply for this Job</h3>
+        <p id="applyJobTitle" style="color:var(--amber); font-weight:600; margin-bottom:20px;"></p>
+        <div id="applyAlert" class="alert"></div>
+        <div class="form-group">
+          <label>Cover Letter <span style="color:var(--gray); font-weight:400">(optional)</span></label>
+          <textarea id="coverLetter" placeholder="Write a short message to the employer..."></textarea>
+        </div>
+        <div style="display:flex; gap:12px;">
+          <button class="btn btn-primary" onclick="submitApplication()">Submit Application</button>
+          <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <p>© 2026 <span>Job Portal System</span></p>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+  let currentJobId = null;
+
+  function updateNav() {
+    const el = document.getElementById("navAuth");
+    if (isLoggedIn()) {
+      const page = getRole() === "employer" ? "employer-dashboard.html" : "seeker-dashboard.html";
+      el.innerHTML = `<a href="${page}">Dashboard</a><a href="#" class="btn-nav" onclick="logout()">Logout</a>`;
+    } else {
+      el.innerHTML = `<a href="login.html" class="btn-nav">Login / Register</a>`;
+    }
+  }
+
+  async function loadJob() {
+    const id = new URLSearchParams(window.location.search).get("id");
+    if (!id) { document.getElementById("jobContent").innerHTML = "<p>Job not found.</p>"; return; }
+    currentJobId = parseInt(id);
+
+    try {
+      const job = await Jobs.getOne(id);
+      const applySection = isLoggedIn() && getRole() === "jobseeker"
+        ? `<button class="btn btn-amber" style="margin-right:10px" onclick="openModal('${job.title}')">Apply Now</button>
+           <button class="btn btn-outline" onclick="doBookmark(${job.id})">Save Job</button>`
+        : !isLoggedIn()
+        ? `<a href="login.html" class="btn btn-amber">Login to Apply</a>`
+        : "";
+
+      document.getElementById("jobContent").innerHTML = `
+        <div style="display:grid; grid-template-columns:1fr 300px; gap:28px; align-items:start;">
+          <div>
+            <div class="card" style="margin-bottom:20px;">
+              <h1 style="color:var(--green-dark); font-size:1.6rem; margin-bottom:8px;">${job.title}</h1>
+              <p style="color:var(--amber); font-weight:700; font-size:1rem; margin-bottom:16px;">${job.company_name || job.employer_name}</p>
+              <div class="job-meta" style="margin-bottom:20px;">
+                <span class="tag">📁 ${job.category}</span>
+                <span class="tag">📍 ${job.location}</span>
+                <span class="tag tag-amber">⏱ ${job.job_type}</span>
+                ${job.salary_range ? `<span class="tag">💰 ${job.salary_range}</span>` : ""}
+              </div>
+              <div style="color:var(--charcoal); line-height:1.7; white-space:pre-wrap; font-size:0.95rem;">${job.description}</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card" style="margin-bottom:16px;">
+              <h4 style="color:var(--green-dark); margin-bottom:16px;">Job Summary</h4>
+              <p style="font-size:0.88rem; color:var(--gray); margin-bottom:8px;"><strong style="color:var(--charcoal)">Category:</strong> ${job.category}</p>
+              <p style="font-size:0.88rem; color:var(--gray); margin-bottom:8px;"><strong style="color:var(--charcoal)">Location:</strong> ${job.location}</p>
+              <p style="font-size:0.88rem; color:var(--gray); margin-bottom:8px;"><strong style="color:var(--charcoal)">Type:</strong> ${job.job_type}</p>
+              ${job.salary_range ? `<p style="font-size:0.88rem; color:var(--gray); margin-bottom:8px;"><strong style="color:var(--charcoal)">Salary:</strong> ${job.salary_range}</p>` : ""}
+              <p style="font-size:0.88rem; color:var(--gray);"><strong style="color:var(--charcoal)">Posted:</strong> ${new Date(job.created_at).toLocaleDateString()}</p>
+            </div>
+            <div class="card">
+              ${applySection || "<p style='color:var(--gray); font-size:0.88rem'>Employers cannot apply to jobs.</p>"}
+            </div>
+          </div>
+        </div>
+      `;
+    } catch(e) {
+      document.getElementById("jobContent").innerHTML = "<p style='color:var(--gray)'>Job not found or an error occurred.</p>";
+    }
+  }
+
+  function openModal(title) {
+    document.getElementById("applyJobTitle").textContent = title;
+    document.getElementById("coverLetter").value = "";
+    document.getElementById("applyAlert").className = "alert";
+    document.getElementById("applyModal").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("applyModal").style.display = "none";
+  }
+
+  async function submitApplication() {
+    const cover_letter = document.getElementById("coverLetter").value.trim();
+    const alertEl = document.getElementById("applyAlert");
+    try {
+      await Applications.apply({ job_id: currentJobId, cover_letter: cover_letter || null });
+      alertEl.textContent = "Application submitted successfully!";
+      alertEl.className = "alert alert-success show";
+      setTimeout(closeModal, 1500);
+    } catch(e) {
+      alertEl.textContent = e.message;
+      alertEl.className = "alert alert-error show";
+    }
+  }
+
+  async function doBookmark(job_id) {
+    try {
+      await Bookmarks.save(job_id);
+      alert("Job saved to your bookmarks!");
+    } catch(e) {
+      alert(e.message);
+    }
+  }
+
+  updateNav();
+  loadJob();
+</script>
+</body>
+</html>
