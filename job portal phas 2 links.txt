@@ -1,0 +1,14 @@
+GitHub Repository (Code & Docs):
+👉 https://github.com/f2024408250-bot/JobPortal
+
+Frontend Live Web Application:
+👉 https://joyful-marshmallow-cad593.netlify.app
+
+Backend API Root Service:
+👉 https://job-portal-eta-sooty.vercel.app
+
+Interactive API Swagger Documentation:
+👉 https://job-portal-eta-sooty.vercel.app/docs
+
+Database Hosting:
+👉 Deployed Cloud PostgreSQL Instance (Supabase)
